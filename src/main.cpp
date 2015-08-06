@@ -135,6 +135,18 @@ do_validation(Canvas &canvas)
     while (loop.step());
 }
 
+void
+do_dump(Canvas &canvas)
+{
+    BenchmarkCollection benchmark_collection;
+
+    benchmark_collection.populate_from_options();
+
+    MainLoopDump loop(canvas, benchmark_collection.benchmarks(), Options::dump);
+
+    while (loop.step());
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -206,6 +218,8 @@ main(int argc, char *argv[])
 
     if (Options::validate)
         do_validation(canvas);
+    else if (Options::dump)
+        do_dump(canvas);
     else
         do_benchmark(canvas);
 

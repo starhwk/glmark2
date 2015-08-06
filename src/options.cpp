@@ -31,6 +31,7 @@
 std::vector<std::string> Options::benchmarks;
 std::vector<std::string> Options::benchmark_files;
 bool Options::validate = false;
+unsigned int Options::dump = 100;
 Options::FrameEnd Options::frame_end = Options::FrameEndDefault;
 std::pair<int,int> Options::size(800, 600);
 bool Options::list_scenes = false;
@@ -48,6 +49,7 @@ static struct option long_options[] = {
     {"benchmark", 1, 0, 0},
     {"benchmark-file", 1, 0, 0},
     {"validate", 0, 0, 0},
+    {"dump", 1, 0, 0},
     {"frame-end", 1, 0, 0},
     {"off-screen", 0, 0, 0},
     {"visual-config", 1, 0, 0},
@@ -61,6 +63,21 @@ static struct option long_options[] = {
     {"help", 0, 0, 0},
     {0, 0, 0, 0}
 };
+
+/**
+ * Parses the number of frames to dump
+ *
+ * @param str the string to parse
+ * @param dump the parsed number of frames to dump
+ */
+static void
+parse_dump(const std::string &str, unsigned int &dump)
+{
+    std::vector<std::string> d;
+    Util::split(str, 'x', d, Util::SplitModeNormal);
+
+    dump = Util::fromString<unsigned int>(str);
+}
 
 /**
  * Parses a size string of the form WxH
@@ -122,6 +139,7 @@ Options::print_help()
            "                         list of benchmark descriptions (one per line)\n"
            "                         (the option can be used multiple times)\n"
            "      --validate         Run a quick output validation test instead of \n"
+           "      --dump NFRAMES     Dump a first frame for NFRAMES times\n"
            "                         running the benchmarks\n"
            "      --frame-end METHOD How to end a frame [default,none,swap,finish,readpixels]\n"
            "      --off-screen       Render to an off-screen surface\n"
@@ -171,6 +189,8 @@ Options::parse_args(int argc, char **argv)
             Options::benchmark_files.push_back(optarg);
         else if (!strcmp(optname, "validate"))
             Options::validate = true;
+        else if (!strcmp(optname, "dump"))
+            parse_dump(optarg, Options::dump);
         else if (!strcmp(optname, "frame-end"))
             Options::frame_end = frame_end_from_str(optarg);
         else if (!strcmp(optname, "off-screen"))

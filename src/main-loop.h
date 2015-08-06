@@ -138,4 +138,20 @@ public:
     virtual void log_scene_result();
 };
 
+/**
+ * Main loop for benchmarking with decorations (eg FPS, demo)
+ */
+class MainLoopDump : public MainLoop
+{
+public:
+    MainLoopDump(Canvas &canvas, const std::vector<Benchmark *> &benchmarks, unsigned total_frame_);
+
+    virtual void draw();
+
+protected:
+    std::string dump_dir_;
+	unsigned frame_;
+	unsigned total_frame_;
+};
+
 #endif /* GLMARK2_MAIN_LOOP_H_ */

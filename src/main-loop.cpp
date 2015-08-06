@@ -27,6 +27,12 @@
 #include <string>
 #include <sstream>
 
+#include <time.h>
+#include <unistd.h>
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
 /************
  * MainLoop *
  ************/
@@ -330,4 +336,47 @@ MainLoopValidation::log_scene_result()
     }
 
     Log::info(format.c_str(), result.c_str());
+}
+
+/**********************
+ * MainLoopDump *
+ **********************/
+
+MainLoopDump::MainLoopDump(Canvas &canvas, const std::vector<Benchmark *> &benchmarks, unsigned dump) :
+        MainLoop(canvas, benchmarks)
+{
+	time_t now;
+	struct stat st;
+
+	dump_dir_ = "/tmp/glmark2-dump/";
+	if (stat(dump_dir_.c_str(), &st) == -1)
+		mkdir(dump_dir_.c_str(), 0700);
+
+	time(&now);
+	dump_dir_.append(ctime(&now));
+	dump_dir_.append("/");
+	if (stat(dump_dir_.c_str(), &st) == -1)
+		mkdir(dump_dir_.c_str(), 0700);
+
+	total_frame_ = dump;
+}
+
+void
+MainLoopDump::draw()
+{
+    std::string file_name = dump_dir_;
+    std::ostringstream frame;
+
+    canvas_.clear();
+
+    scene_->draw();
+
+    canvas_.update();
+	file_name.append(scene_->name().c_str());
+	frame << frame_;
+    canvas_.write_to_file(file_name.append(frame.str()));
+	if (++frame_ >= total_frame_) {
+        scene_->running(false);
+		frame_ = 0;
+	}
 }
